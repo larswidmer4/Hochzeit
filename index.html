@@ -448,9 +448,87 @@
   @media (prefers-reduced-motion: reduce){
     .hero-content{ animation: none; opacity: 1; transform: none; }
   }
+  #pwGate{
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background-color: var(--sand);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='56' viewBox='0 0 220 56'%3E%3Cpath d='M0 28 Q 27.5 8 55 28 T 110 28 T 165 28 T 220 28' fill='none' stroke='%23e7d7b3' stroke-width='1.4' opacity='0.65'/%3E%3Cpath d='M0 46 Q 27.5 30 55 46 T 110 46 T 165 46 T 220 46' fill='none' stroke='%23e7d7b3' stroke-width='1.1' opacity='0.45'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 220px 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  #pwGate.hidden{ display: none; }
+
+  .pw-card{
+    background: var(--paper);
+    border-top: 6px solid var(--coral);
+    padding: 40px 32px;
+    max-width: 340px;
+    width: 100%;
+    text-align: center;
+  }
+  .pw-card h2{
+    font-family: 'Newsreader', serif;
+    font-style: italic;
+    font-weight: 500;
+    font-size: 1.7rem;
+    margin: 0 0 10px;
+    color: var(--teal-deep);
+  }
+  .pw-card p{ color: var(--ink-soft); font-size: 0.92rem; margin: 0 0 22px; }
+  .pw-card input{
+    width: 100%;
+    padding: 12px;
+    border: 2px solid var(--sand-deep);
+    border-radius: 8px;
+    font-size: 1rem;
+    text-align: center;
+    margin-bottom: 14px;
+    font-family: 'IBM Plex Sans', sans-serif;
+    color: var(--ink);
+  }
+  .pw-card input:focus{ outline: none; border-color: var(--coral); }
+  .pw-card button{
+    width: 100%;
+    padding: 12px;
+    background: var(--coral);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+  .pw-card button:active{ background: #e85a3c; }
+  .pw-error{ color: var(--coral); font-size: 0.85rem; margin: 12px 0 0; display: none; }
+  .pw-error.show{ display: block; }
+
+  @keyframes pwShake{
+    10%, 90% { transform: translateX(-2px); }
+    20%, 80% { transform: translateX(4px); }
+    30%, 50%, 70% { transform: translateX(-8px); }
+    40%, 60% { transform: translateX(8px); }
+  }
+  .pw-card.shake{ animation: pwShake 0.5s; }
+
 </style>
 </head>
 <body>
+
+<div id="pwGate">
+  <div class="pw-card" id="pwCard">
+    <h2>Deniz &amp; Lars</h2>
+    <p>Diese Einladung ist geschützt. Bitte Passwort eingeben.</p>
+    <input type="password" id="pwInput" placeholder="Passwort" autocomplete="off">
+    <button type="button" id="pwSubmit">Weiter</button>
+    <p class="pw-error" id="pwError">Falsches Passwort, versuch's nochmal.</p>
+  </div>
+</div>
 
 <div class="hero">
   <div class="hero-content">
@@ -655,6 +733,35 @@
 </footer>
 
 <script>
+  (function(){
+    const PASSWORD = 'Krakau2024';
+    const pwGate = document.getElementById('pwGate');
+    const pwCard = document.getElementById('pwCard');
+    const pwInput = document.getElementById('pwInput');
+    const pwError = document.getElementById('pwError');
+    const pwSubmit = document.getElementById('pwSubmit');
+
+    if (sessionStorage.getItem('wedding_pw_ok') === '1') {
+      pwGate.classList.add('hidden');
+    }
+
+    function checkPw(){
+      if (pwInput.value === PASSWORD) {
+        sessionStorage.setItem('wedding_pw_ok', '1');
+        pwGate.classList.add('hidden');
+      } else {
+        pwError.classList.add('show');
+        pwCard.classList.remove('shake');
+        void pwCard.offsetWidth;
+        pwCard.classList.add('shake');
+        pwInput.value = '';
+      }
+    }
+
+    pwSubmit.addEventListener('click', checkPw);
+    pwInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') checkPw(); });
+  })();
+
   const sandoasePane = document.getElementById('sandoasePane');
   const boatPane = document.getElementById('boatPane');
   const venueStack = document.getElementById('venueStack');
